@@ -131,5 +131,16 @@ CKTinit(CKTcircuit **ckt)		/* new circuit to create */
     g_mif_info.auto_partial.local = MIF_FALSE;
 /* gtri - end - wbk - 01/12/91 */
 #endif
+
+#ifdef USE_CUSPICE
+    for (i = 0; i < sizeof sckt->streams/sizeof *sckt->streams; i++)
+	    cudaStreamCreate(&sckt->streams[i]);
+
+    for (i = 0; i < sizeof sckt->events/sizeof *sckt->events; i++)
+	    cudaEventCreateWithFlags(&sckt->events[i],cudaEventBlockingSync | cudaEventDisableTiming);
+
+    sckt->nextEvent = 0;
+#endif
+
     return OK;
 }

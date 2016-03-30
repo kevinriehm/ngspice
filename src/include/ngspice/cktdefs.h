@@ -32,6 +32,10 @@
 #include "ngspice/noisedef.h"
 #include "ngspice/hash.h"
 
+#ifdef USE_CUSPICE
+#include "cuda_runtime.h"
+#endif
+
 
 
 struct CKTnode {
@@ -338,6 +342,10 @@ struct CKTcircuit {
     double *CKTtimeSteps ;
     double *d_CKTtimeSteps ;
     double *d_CKTtimeStepsOut ;
+
+    cudaStream_t streams[2] ;
+    cudaEvent_t events[8] ;
+    int nextEvent ;
 #endif
 
 };

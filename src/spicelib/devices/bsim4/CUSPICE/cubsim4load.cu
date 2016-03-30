@@ -255,12 +255,13 @@ GENmodel *inModel, CKTcircuit *ckt
     BSIM4model *model = (BSIM4model *)inModel ;
     int i, thread_x, thread_y, block_x ;
 
-    cudaStream_t stream [2] ;
+//    cudaStream_t stream [2] ;
+    cudaEvent_t events [2] ;
 
     cudaError_t status ;
 
-    for (i = 0 ; i < 2 ; i++)
-        cudaStreamCreate (&(stream [i])) ;
+//    for (i = 0 ; i < 2 ; i++)
+//        cudaStreamCreate (&(stream [i])) ;
 
     i = 0 ;
 
@@ -280,7 +281,7 @@ GENmodel *inModel, CKTcircuit *ckt
         /* Kernel launch */
         status = cudaGetLastError () ; // clear error status
 
-        cuBSIM4load_kernel <<< block_x, thread, 0, stream [i] >>>
+        cuBSIM4load_kernel <<< block_x, thread, 0, ckt->streams [i%(sizeof ckt->streams/sizeof *ckt->streams)] >>>
                                                    (model->BSIM4paramGPU, model->d_pParam, ckt->d_CKTrhsOld,
                                                     ckt->d_CKTstate0, ckt->d_CKTstate1, ckt->d_CKTstate2,
                                                     ckt->CKTdelta, ckt->CKTdeltaOld [1], ckt->CKTreltol,
@@ -339,11 +340,27 @@ GENmodel *inModel, CKTcircuit *ckt
         i++ ;
     }
 
-    cudaDeviceSynchronize () ;
+    /* Keep the streams in sync with everything after this */
+    events [0] = ckt->events[ckt->nextEvent] ;
+    ckt->nextEvent = (ckt->nextEvent + 1)%(sizeof ckt->events/sizeof *ckt->events) ;
+
+    events [1] = ckt->events[ckt->nextEvent] ;
+    ckt->nextEvent = (ckt->nextEvent + 1)%(sizeof ckt->events/sizeof *ckt->events) ;
+
+    cudaEventSynchronize (events [0]) ;
+    cudaEventSynchronize (events [1]) ;
+
+    cudaEventRecord (events [0], ckt->streams [0]) ;
+    cudaEventRecord (events [1], ckt->streams [1]) ;
+
+    cudaStreamWaitEvent (ckt->streams [0], events [1], 0) ;
+    cudaStreamWaitEvent (ckt->streams [1], events [0], 0) ;
+
+//    cudaDeviceSynchronize () ;
 
     /* Deallocation */
-    for (i = 0 ; i < 2 ; i++)
-        cudaStreamDestroy (stream [i]) ;
+//    for (i = 0 ; i < 2 ; i++)
+//        cudaStreamDestroy (stream [i]) ;
 
     return (OK) ;
 }

@@ -80,6 +80,18 @@ CKTdestroy(CKTcircuit *ckt)
     FREE(ckt->evt);
 #endif
 
+#ifdef USE_CUSPICE
+    for(i = 0; i < sizeof ckt->streams/sizeof *ckt->streams; i++) {
+        cudaStreamSynchronize(ckt->streams[i]);
+        cudaStreamDestroy(ckt->streams[i]);
+    }
+
+    for(i = 0; i < sizeof ckt->events/sizeof *ckt->events; i++) {
+        cudaEventSynchronize(ckt->events[i]);
+        cudaEventDestroy(ckt->events[i]);
+    }
+#endif
+
     nghash_free(ckt->DEVnameHash, NULL, NULL);
     nghash_free(ckt->MODnameHash, NULL, NULL);
     FREE(ckt);
