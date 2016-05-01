@@ -24,7 +24,12 @@ int
 CKTinit(CKTcircuit **ckt)		/* new circuit to create */
 {
     int i;
-    CKTcircuit *sckt = TMALLOC(CKTcircuit, 1);
+    CKTcircuit *sckt;
+#ifdef USE_CUSPICE
+    cudaMallocHost(&sckt, sizeof(CKTcircuit));
+#else
+    sckt = TMALLOC(CKTcircuit, 1);
+#endif
     *ckt = sckt;
     if (sckt == NULL)
 	return(E_NOMEM);
@@ -34,8 +39,6 @@ CKTinit(CKTcircuit **ckt)		/* new circuit to create */
     sckt->CKThead = TMALLOC(GENmodel *, DEVmaxnum);
     if(sckt->CKThead == NULL) return(E_NOMEM);
 /* gtri - end   - dynamically allocate the array of model lists */
-
-
 	
     for (i = 0; i < DEVmaxnum; i++)
         sckt->CKThead[i] = NULL;

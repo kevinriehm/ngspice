@@ -94,7 +94,11 @@ CKTdestroy(CKTcircuit *ckt)
 
     nghash_free(ckt->DEVnameHash, NULL, NULL);
     nghash_free(ckt->MODnameHash, NULL, NULL);
+#ifdef USE_CUSPICE
+    cudaFreeHost(ckt);
+#else
     FREE(ckt);
+#endif
     return(OK);
 }
 

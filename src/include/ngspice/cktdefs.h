@@ -351,7 +351,7 @@ struct CKTcircuit {
 };
 
 
-/* Now function prottypes */
+/* Now function prototypes */
 
 extern int ACan(CKTcircuit *, int);
 extern int ACaskQuest(CKTcircuit *, JOB *, int , IFvalue *);
