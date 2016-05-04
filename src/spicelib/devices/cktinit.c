@@ -36,7 +36,11 @@ CKTinit(CKTcircuit **ckt)		/* new circuit to create */
 /* gtri - begin - dynamically allocate the array of model lists */
 /* CKThead used to be statically sized in CKTdefs.h, but has been changed */
 /* to a ** pointer */
+#ifdef USE_CUSPICE
+    cudaMallocHost(&sckt->CKThead, sizeof(GENmodel *)*DEVmaxnum);
+#else
     sckt->CKThead = TMALLOC(GENmodel *, DEVmaxnum);
+#endif
     if(sckt->CKThead == NULL) return(E_NOMEM);
 /* gtri - end   - dynamically allocate the array of model lists */
 	
@@ -78,17 +82,23 @@ CKTinit(CKTcircuit **ckt)		/* new circuit to create */
     sckt->CKTsrcFact=1;
     sckt->CKTdiagGmin=0;
     /* PN: additions for circuit inventory */
+#ifdef USE_CUSPICE
+    cudaMallocHost(&sckt->CKTstat, sizeof(STATistics));
+#else
     sckt->CKTstat = TMALLOC(STATistics, 1);
+#endif
     if(sckt->CKTstat == NULL)
         return(E_NOMEM);
+#ifdef USE_CUSPICE
+    cudaMallocHost(&sckt->CKTstat->STATdevNum, sizeof(STATdevList)*DEVmaxnum);
+#else
     sckt->CKTstat->STATdevNum = TMALLOC(STATdevList, DEVmaxnum);
+#endif
     if(sckt->CKTstat->STATdevNum == NULL)
         return(E_NOMEM);
     sckt->CKTtroubleNode = 0;
     sckt->CKTtroubleElt = NULL;
     sckt->CKTtimePoints = NULL;
-    if (sckt->CKTstat == NULL)
-	return E_NOMEM;
     sckt->CKTnodeDamping = 0;
     sckt->CKTabsDv = 0.5;
     sckt->CKTrelDv = 2.0;
@@ -100,7 +110,11 @@ CKTinit(CKTcircuit **ckt)		/* new circuit to create */
 /* gtri - begin - wbk - allocate/initialize substructs */
 
     /* Allocate evt data structure */
+#ifdef USE_CUSPICE
+    cudaMallocHost(&sckt->evt, sizeof(Evt_Ckt_Data_t);
+#else
     sckt->evt = TMALLOC(Evt_Ckt_Data_t, 1);
+#endif
     if(! sckt->evt)
         return(E_NOMEM);
 
@@ -108,7 +122,11 @@ CKTinit(CKTcircuit **ckt)		/* new circuit to create */
     sckt->evt->options.op_alternate = MIF_TRUE;
 
     /* Allocate enh data structure */
+#ifdef USE_CUSPICE
+    cudaMallocHost(&sckt->enh, sizeof(Enh_Ckt_Data_t);
+#else
     sckt->enh = TMALLOC(Enh_Ckt_Data_t, 1);
+#endif
     if(! sckt->enh)
         return(E_NOMEM);
 

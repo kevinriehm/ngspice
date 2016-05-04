@@ -69,15 +69,25 @@ CKTdestroy(CKTcircuit *ckt)
     FREE(ckt->CKTirhs);
     FREE(ckt->CKTirhsOld);
     FREE(ckt->CKTirhsSpare);
-
+#ifdef USE_CUSPICE
+    cudaFreeHost(ckt->CKTstat->STATdevNum);
+    cudaFreeHost(ckt->CKTstat);
+    cudaFreeHost(ckt->CKThead);
+#else
     FREE(ckt->CKTstat->STATdevNum);
     FREE(ckt->CKTstat);
     FREE(ckt->CKThead);
+#endif
 
 #ifdef XSPICE
     evt_dest(ckt->evt);
+#ifdef USE_CUSPICE
+    cudaFreeHost(ckt->enh);
+    cudaFreeHost(ckt->evt);
+#else
     FREE(ckt->enh);
     FREE(ckt->evt);
+#endif
 #endif
 
 #ifdef USE_CUSPICE
