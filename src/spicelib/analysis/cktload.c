@@ -131,6 +131,7 @@ CKTload(CKTcircuit *ckt)
     CUDAMEMCPYCHECK (ckt->d_CKTloadOutput + ckt->total_n_values, 1, double, status)
 
     /* Performing CSRMV for the Sparse Matrix using CUSPARSE */
+    cusparseSetStream((cusparseHandle_t)(ckt->CKTmatrix->CKTcsrmvHandle), ckt->streams[0]);
     cusparseStatus = cusparseDcsrmv ((cusparseHandle_t)(ckt->CKTmatrix->CKTcsrmvHandle),
                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
                                      ckt->CKTmatrix->CKTklunz, ckt->total_n_values + 1,
@@ -147,6 +148,7 @@ CKTload(CKTcircuit *ckt)
     }
 
     /* Performing CSRMV for the RHS using CUSPARSE */
+    cusparseSetStream((cusparseHandle_t)(ckt->CKTmatrix->CKTcsrmvHandle), ckt->streams[1]);
     cusparseStatus = cusparseDcsrmv ((cusparseHandle_t)(ckt->CKTmatrix->CKTcsrmvHandle),
                                      CUSPARSE_OPERATION_NON_TRANSPOSE,
                                      ckt->CKTmatrix->CKTkluN + 1, ckt->total_n_valuesRHS, ckt->total_n_PtrRHS,
@@ -161,7 +163,7 @@ CKTload(CKTcircuit *ckt)
         return (E_NOMEM) ;
     }
 
-    cudaDeviceSynchronize () ;
+    cuCKTsystemBarrier (ckt) ;
 
     status = cuCKTsystemDtoH (ckt) ;
     if (status != 0)
@@ -249,6 +251,7 @@ CKTload(CKTcircuit *ckt)
             }
         }
     }
+
     /* SMPprint(ckt->CKTmatrix, stdout); if you want to debug, this is a
     good place to start ... */
 

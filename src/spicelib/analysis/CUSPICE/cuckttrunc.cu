@@ -52,11 +52,7 @@ CKTcircuit *ckt, double timetemp, double *timeStep
 
     cuCKTtrunc_kernel <<< block_x, thread, thread_y * sizeof(double) >>> (ckt->d_CKTtimeSteps, ckt->d_CKTtimeStepsOut, ckt->total_n_timeSteps) ;
 
-    cudaDeviceSynchronize () ;
-
     cuCKTtrunc_kernel <<< 1, thread, thread_y * sizeof(double) >>> (ckt->d_CKTtimeStepsOut, ckt->d_CKTtimeSteps, block_x) ;
-
-    cudaDeviceSynchronize () ;
 
     status = cudaGetLastError () ; // check for launch error
     if (status != cudaSuccess)

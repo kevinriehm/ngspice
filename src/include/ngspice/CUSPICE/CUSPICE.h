@@ -23,6 +23,10 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int cuCKTcsrmv (CKTcircuit *) ;
 int cuCKTflush (CKTcircuit *) ;
 int cuCKTnonconUpdateHtoD (CKTcircuit *) ;
@@ -31,6 +35,7 @@ int cuCKTrhsOldFlush (CKTcircuit *) ;
 int cuCKTrhsOldUpdateHtoD (CKTcircuit *) ;
 int cuCKTrhsOldUpdateDtoH (CKTcircuit *) ;
 int cuCKTsetup (CKTcircuit *) ;
+int cuCKTsystemBarrier (CKTcircuit *) ;
 int cuCKTsystemDtoH (CKTcircuit *) ;
 int cuCKTstatesFlush (CKTcircuit *) ;
 int cuCKTstate0UpdateHtoD (CKTcircuit *) ;
@@ -80,3 +85,7 @@ int cuVSRCdestroy (GENmodel *) ;
 int cuVSRCload (GENmodel *, CKTcircuit *) ;
 int cuVSRCsetup (GENmodel *) ;
 int cuVSRCtemp (GENmodel *) ;
+
+#ifdef __cplusplus
+}
+#endif

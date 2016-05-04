@@ -40,6 +40,32 @@
     }
 
 int
+cuCKTsystemBarrier
+(
+CKTcircuit *ckt
+)
+{
+    cudaEvent_t events[2];
+
+    events [0] = ckt->events[ckt->nextEvent] ;
+    ckt->nextEvent = (ckt->nextEvent + 1)%(sizeof ckt->events/sizeof *ckt->events) ;
+
+    events [1] = ckt->events[ckt->nextEvent] ;
+    ckt->nextEvent = (ckt->nextEvent + 1)%(sizeof ckt->events/sizeof *ckt->events) ;
+
+    cudaEventSynchronize (events [0]) ;
+    cudaEventSynchronize (events [1]) ;
+
+    cudaEventRecord (events [0], ckt->streams [0]) ;
+    cudaEventRecord (events [1], ckt->streams [1]) ;
+
+    cudaStreamWaitEvent (ckt->streams [0], events [1], 0) ;
+    cudaStreamWaitEvent (ckt->streams [1], events [0], 0) ;
+
+    return (OK);
+}
+
+int
 cuCKTsystemDtoH
 (
 CKTcircuit *ckt

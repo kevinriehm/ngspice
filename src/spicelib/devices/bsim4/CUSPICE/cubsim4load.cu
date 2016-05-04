@@ -28,6 +28,7 @@
 #include "ngspice/macros.h"
 #include "ngspice/CUSPICE/cuniinteg.cuh"
 #include "bsim4def.h"
+#include "ngspice/CUSPICE/CUSPICE.h"
 
 #define MAX_EXPL 2.688117142e+43
 #define MIN_EXPL 3.720075976e-44
@@ -255,13 +256,7 @@ GENmodel *inModel, CKTcircuit *ckt
     BSIM4model *model = (BSIM4model *)inModel ;
     int i, thread_x, thread_y, block_x ;
 
-//    cudaStream_t stream [2] ;
-    cudaEvent_t events [2] ;
-
     cudaError_t status ;
-
-//    for (i = 0 ; i < 2 ; i++)
-//        cudaStreamCreate (&(stream [i])) ;
 
     i = 0 ;
 
@@ -341,26 +336,7 @@ GENmodel *inModel, CKTcircuit *ckt
     }
 
     /* Keep the streams in sync with everything after this */
-    events [0] = ckt->events[ckt->nextEvent] ;
-    ckt->nextEvent = (ckt->nextEvent + 1)%(sizeof ckt->events/sizeof *ckt->events) ;
-
-    events [1] = ckt->events[ckt->nextEvent] ;
-    ckt->nextEvent = (ckt->nextEvent + 1)%(sizeof ckt->events/sizeof *ckt->events) ;
-
-    cudaEventSynchronize (events [0]) ;
-    cudaEventSynchronize (events [1]) ;
-
-    cudaEventRecord (events [0], ckt->streams [0]) ;
-    cudaEventRecord (events [1], ckt->streams [1]) ;
-
-    cudaStreamWaitEvent (ckt->streams [0], events [1], 0) ;
-    cudaStreamWaitEvent (ckt->streams [1], events [0], 0) ;
-
-//    cudaDeviceSynchronize () ;
-
-    /* Deallocation */
-//    for (i = 0 ; i < 2 ; i++)
-//        cudaStreamDestroy (stream [i]) ;
+    cuCKTsystemBarrier (ckt) ;
 
     return (OK) ;
 }
